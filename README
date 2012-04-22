@@ -1,0 +1,10 @@
+This is a MVC framework developed in PHP5 following POO rules.
+
+It has the basic features that you will need in any project:
+- MVC pattern
+- Singleton DB connection
+- Multilanguage
+- Session handler
+- log any activity in files
+
+Thanks to Federico Lozada Mosto for the session handler code
