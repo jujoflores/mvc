@@ -14,7 +14,7 @@ abstract class ModelBase{
         $lang = Session::get('lang') ? Session::get('lang') : $this->_config->get('defaultLang');
          
         $this->_lang = new Translator($lang);
-        $this->_db = Bd::getSingleton(
+        $this->_db = Bd::getInstance(
                         new MySql($this->_config->get('dbhost'), 
                                   $this->_config->get('dbname'), 
                                   $this->_config->get('dbuser'), 
