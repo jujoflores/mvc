@@ -2,62 +2,55 @@
 require_once 'ManejadorBdInterface.php';
 
 class Bd{
-    private static $_instancia;
-    private $_manejador;
+    private static $_instance;
+    private $_handler;
 
-    private function __construct(ManejadorBdInterface $manejador){
-        $this->_manejador = $manejador;
+    private function __construct(ManejadorBdInterface $handler){
+        $this->_handler = $handler;
     }
 
-    public function nuevaConexion(ManejadorBdInterface $manejador){
-        return new Bd($manejador);
+    public function nuevaConexion(ManejadorBdInterface $handler){
+        return new Bd($handler);
     }
 
-    // EL metodo singleton
-    public static function getSingleton(ManejadorBdInterface $manejador){
-        if(! self::$_instancia){
-            self::$_instancia = new Bd($manejador);
+    // Singleton method
+    public static function getInstance(ManejadorBdInterface $handler){
+        if(! self::$_instance){
+            self::$_instance = new Bd($handler);
         }
-        return self::$_instancia;
+        return self::$_instance;
     }
 
-    // Clone no permitido
+    // Clone not allowed
     public function __clone(){
-        trigger_error('Clone no se permite.', E_USER_ERROR);
+        trigger_error('Clone not allowed.', E_USER_ERROR);
     }
 
     public function ejecutar($sql){
-        $resultado = $this->_manejador->ejecutar($sql);
-        return $resultado;
+        return $this->_handler->ejecutar($sql);
     }
 
     public function obtenerRegistro($sql){
-        $registro = $this->_manejador->obtenerRegistro($sql);
-        return $registro;
+        return $this->_handler->obtenerRegistro($sql);
     }
 
     public function obtenerCampo($field, $sql){
-        $campo = $this->_manejador->obtenerCampo($field, $sql);
-        return $campo;
+        return $this->_handler->obtenerCampo($field, $sql);
     }
 
     public function obtenerDatos($sql){
-        $datos = $this->_manejador->obtenerDatos($sql);
-        return $datos;
+        return $this->_handler->obtenerDatos($sql);
     }
 
     public function insertarRegistro($table, $data){
-        $registro = $this->_manejador->insertarRegistro($table, $data);
-        return $registro;
+        return $this->_handler->insertarRegistro($table, $data);
     }
 
     public function eliminarRegistro($table, $primaryKey, $key){
-        $registro = $this->_manejador->eliminarRegistro($table, $primaryKey, $key);
-        return $registro;
+        return $this->_handler->eliminarRegistro($table, $primaryKey, $key);
     }
 
     public function actualizarRegistro($table, $data, $primaryKey, $key){
-        $registro = $this->_manejador->actualizarRegistro($table, $data, $primaryKey, $key);
-        return $registro;
+        return $this->_handler->actualizarRegistro($table, $data, $primaryKey, $key);
     }
 }
