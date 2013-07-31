@@ -1,105 +1,88 @@
 <?php
-require_once 'ManejadorBdInterface.php';
+require_once 'DbHandler.php';
 require_once 'Error.php';
 
-class MySql implements ManejadorBdInterface{
-    private $_servidor;
+class MySql implements DbHandler{
+    private $_server;
     private $_base;
-    private $_usuario;
+    private $_user;
     private $_pass;
 
-    private $_conexion;
+    private $_connection;
 
-    public function __construct($servidor, $base, $usuario, $pass){
-        $this->_servidor = $servidor;
+    public function __construct($server, $base, $user, $pass){
+        $this->_server = $server;
         $this->_base = $base;
-        $this->_usuario = $usuario;
+        $this->_user = $user;
         $this->_pass = $pass;
     }
 
-    public function conectar(){      
-        if(!$this->_conexion){  
-            $this->_conexion = mysql_connect($this->_servidor, $this->_usuario, $this->_pass) or new Error(mysql_error($this->_conexion));
+    public function connect(){      
+        if(!$this->_connection){  
+            $this->_connection = mysql_connect($this->_server, $this->_user, $this->_pass) 
+            	or new Error(mysql_error($this->_connection));
         }
         
-        mysql_select_db($this->_base, $this->_conexion) or new Error(mysql_error($this->_conexion));
+        mysql_select_db($this->_base, $this->_connection) or new Error(mysql_error($this->_connection));
     }
 
-    public function desconectar(){
-        if($this->_conexion){
-            mysql_close($this->_conexion);
-            $this->_conexion = null;
+    public function disconnect(){
+        if($this->_connection){
+            mysql_close($this->_connection);
+            $this->_connection = null;
         }
     }
 
-    public function obtenerCampo($campo, $sql){
-        if(!$this->_conexion){  
-            $this->conectar();
+    public function getOneField($field, $sql){
+        if(!$this->_connection){  
+            $this->connect();
         }
         
         $sql .= ' LIMIT 0,1';
 
-        $resource = mysql_query($sql, $this->_conexion) or new Error(mysql_error($this->_conexion));
+        $resource = mysql_query($sql, $this->_connection) or new Error(mysql_error($this->_connection));
         if($resource){
-            $registro = mysql_fetch_assoc($resource);
+            $row = mysql_fetch_assoc($resource);
             mysql_free_result($resource);
-            return $registro[$campo];
+            return $row[$field];
         }
         return false;
     }
 
-    public function obtenerRegistro($sql){
-        if(!$this->_conexion){  
-            $this->conectar();
+    public function getOne($sql){
+        if(!$this->_connection){  
+            $this->connect();
         }
         
         $sql .= ' LIMIT 0,1';
-        $resource = mysql_query($sql, $this->_conexion) or new Error(mysql_error($this->_conexion));
+        $resource = mysql_query($sql, $this->_connection) or new Error(mysql_error($this->_connection));
         if($resource){
             return mysql_fetch_assoc($resource);
         }
         return false;
     }
 
-    public function obtenerDatos($sql){
-        if(!$this->_conexion){  
-            $this->conectar();
+    public function getAll($sql){
+        if(!$this->_connection){  
+            $this->connect();
         }
 
-        $resource = mysql_query($sql, $this->_conexion) or new Error(mysql_error($this->_conexion));
+        $resource = mysql_query($sql, $this->_connection) or new Error(mysql_error($this->_connection));
 
         if($resource && mysql_num_rows($resource)){
-            while($registro = mysql_fetch_assoc($resource)){
-                $resultado[] = $registro;
+            while($row = mysql_fetch_assoc($resource)){
+                $result[] = $row;
             }
             mysql_free_result($resource);
-            return $resultado;
+            return $result;
         }
 
         return array();
     }
 
-    public function obtenerResource($sql){
-        if(!$this->_conexion){  
-            $this->conectar();
-        }
-
-        $resource = mysql_query($sql, $this->_conexion) or new Error(mysql_error($this->_conexion));
-
-        if($resource && mysql_num_rows($resource)){
-            return $resource;
-        }
-        
-        return false;
-    }
-    
-    public function recorrer($resource){
-        return mysql_fetch_assoc($resource);
-    }
-
-    public function insertarRegistro($table, $data){
-        if(!$this->_conexion){  
-            $this->conectar();
+    public function insert($table, $data){
+        if(!$this->_connection){  
+            $this->connect();
         }
         
         $fields = array();
@@ -114,27 +97,27 @@ class MySql implements ManejadorBdInterface{
         $sql = "INSERT INTO {$this->_base}.{$table} (" . implode(', ', $fields) . ') ';
         $sql .= "VALUES ('" . implode("', '", $values) . "')";
 
-        mysql_query($sql, $this->_conexion) or new Error(mysql_error($this->_conexion));
+        mysql_query($sql, $this->_connection) or new Error(mysql_error($this->_connection));
 
-        if(mysql_affected_rows($this->_conexion) == 1){
-            return mysql_insert_id($this->_conexion);
+        if(mysql_affected_rows($this->_connection) == 1){
+            return mysql_insert_id($this->_connection);
         }
 
         return false;
     }
 
-    public function eliminarRegistro($table, $primaryKey, $key){
-        if(!$this->_conexion){  
-            $this->conectar();
+    public function delete($table, $primaryKey, $key){
+        if(!$this->_connection){  
+            $this->connect();
         }
         
         $sql = "DELETE FROM {$this->_base}.{$table} WHERE {$primaryKey} = '{$key}'";
-        return mysql_query($sql, $this->_conexion) or new Error(mysql_error($this->_conexion));
+        return mysql_query($sql, $this->_connection) or new Error(mysql_error($this->_connection));
     }
 
-    public function actualizarRegistro($table, $data, $primaryKey, $key){
-        if(!$this->_conexion){  
-            $this->conectar();
+    public function update($table, $data, $primaryKey, $key){
+        if(!$this->_connection){  
+            $this->connect();
         }
         
         $fields = array();
@@ -149,14 +132,14 @@ class MySql implements ManejadorBdInterface{
         $sql .= "SET " . implode(", ", $fields) . " ";
         $sql .= "WHERE {$primaryKey} = '{$key}'";
 
-        return mysql_query($sql, $this->_conexion) or new Error(mysql_error($this->_conexion));
+        return mysql_query($sql, $this->_connection) or new Error(mysql_error($this->_connection));
     }
 
-    public function ejecutar($sql){
-        if(!$this->_conexion){  
-            $this->conectar();
+    public function execute($sql){
+        if(!$this->_connection){  
+            $this->connect();
         }
         
-        return mysql_query($sql, $this->_conexion) or new Error(mysql_error($this->_conexion));
+        return mysql_query($sql, $this->_connection) or new Error(mysql_error($this->_connection));
     }
 }

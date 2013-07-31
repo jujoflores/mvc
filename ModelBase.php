@@ -9,18 +9,18 @@ abstract class ModelBase{
     protected $_notice;
 
     public function __construct(){
-        $this->_config = Config::singleton();
+        $this->_config = Config::getInstance();
         $this->_error = array();
         $lang = Session::get('lang') ? Session::get('lang') : $this->_config->get('defaultLang');
          
         $this->_lang = new Translator($lang);
-        $this->_db = Bd::getInstance(
-                        new MySql($this->_config->get('dbhost'), 
-                                  $this->_config->get('dbname'), 
-                                  $this->_config->get('dbuser'), 
-                                  $this->_config->get('dbpass')
-                                 )
-                        );
+        $this->_db = Db::getInstance(
+			new MySql($this->_config->get('dbhost'), 
+            	$this->_config->get('dbname'), 
+                $this->_config->get('dbuser'), 
+                $this->_config->get('dbpass')
+			)
+		);
     }
     
     public function getLang(){

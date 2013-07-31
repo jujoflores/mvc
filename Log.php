@@ -19,7 +19,7 @@ class Log{
         }
 
         if(!is_file($fileName)){
-            new Error('No se puede crear el archivo');
+            new Error('Can not create the log file');
         }
     }
 

@@ -6,33 +6,35 @@ class Translator{
     private $_commands = array();
 
     public function __construct($language){
-        $this->_language = $language ? $language : 'ES';
+        $this->_language = $language ? $language : 'es';
         $this->_readFile();
     }
 
     private function _readFile(){
-        $config = Config::singleton();
-        $content = file_get_contents($config->get('langFolder') . $this->_language . '.txt');
+        $config = Config::getInstance();
+        $filename = $config->get('langFolder') . strtolower($this->_language) . '.ini';
+        $content = file_get_contents($filename);
         $lines = explode($this->_eol, $content);
-
+        
         if(is_array($lines) && count($lines) > 0){
-            foreach($lines as $line){
-                $this->_readLine($line);
-            }
+        	foreach($lines as $line){
+        		$this->_readLine($line);
+        	}
         }
     }
 
     private function _readLine($line){
-        if($line){
-            if($line[0] != '#'){ //Para tomar como comentarios las lineas que comiencen con #
-                list($key, $value) = explode('=', $line, 2);
-                $key = trim($key);
-                $value = trim($value);
-                $this->_commands[$key] = $value;
-            }
-        }
+    	if($line){
+    		if($line[0] != '#' && $line[0] != ';'){
+    			list($key, $value) = explode('=', $line, 2);
+    			$key = trim($key);
+    			$value = trim($value);
+    			$this->_commands[$key] = $value;
+    		}
+    	}
     }
-
+    
+    
     public function getLanguage(){
         return $this->_language;
     }

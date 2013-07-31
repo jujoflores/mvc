@@ -3,7 +3,7 @@ class Error{
     private $_mail = 'jjsogua@hotmail.com';
     
     public function __construct($detail = ''){
-        $this->_send($detail);
+    	$this->_writeError($detail);
     }
     
     private function _printr($array){
@@ -77,4 +77,29 @@ class Error{
 
         @mail($this->_mail, $subject, $content, "MIME-Version: 1.0\r\nContent-type: text/html; charset=iso-8859-1\r\nFrom: {$this->_mail}\r\nReturn-path: {$this->_mail}\r\n");
     }
+    
+    private function _writeError($detail){
+    	$path = '../log/';    	 
+    	$file = 'error_01'.date('m').date('Y').'.err';
+    	 
+    	$string = date('d/m/Y H:i:s') . "\t";
+    	$string .= $detail . "\n";
+    	$this->_setPath($path, $file);
+    
+    	file_put_contents($path . $file, $string, FILE_APPEND);
+    }
+    
+    private function _setPath($path, $file){
+    	$fileName =  $path . $file;
+    
+    	if(!is_file($fileName)){
+    		if(!is_dir($path)){
+    			mkdir($path);
+    			chmod($path, 0777);
+    		}
+    
+    		touch($fileName);
+    		chmod($fileName, 0777);
+    	}
+    }    
 }
